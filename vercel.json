@@ -1,0 +1,1 @@
+{"rewrites":[{"source":"/((?!api/|nfts/|assets/|mockServiceWorker.js).*)","destination":"/index.html"}]}
