@@ -12,7 +12,6 @@ export const socketIoHandler=socketLink.addEventListener('connection',(connectio
   const {client}=toSocketIo(connection);
   clients.add(client);
   connection.client.addEventListener('close',()=>clients.delete(client));
-  // Permite que testes E2E disparem eventos via socket.emit('__test:nft.updated', payload)
   client.on('__test:nft.updated',(_, payload:NftUpdatedPayload)=>{broadcast('nft.updated',payload);});
   client.on('__test:order.updated',(_, payload:OrderUpdatedPayload)=>{broadcast('order.updated',payload);});
 });

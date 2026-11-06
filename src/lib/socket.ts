@@ -2,7 +2,6 @@ import { io, Socket } from 'socket.io-client';
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-// Singleton — uma única conexão para toda a aplicação
 let socket: Socket | null = null;
 
 export function getSocket(): Socket {
@@ -12,7 +11,6 @@ export function getSocket(): Socket {
       transports: ['websocket', 'polling'],
       autoConnect: true,
     });
-    // Expõe para testes E2E dispararem eventos via page.evaluate
     if (typeof window !== 'undefined') {
       (window as any).__appSocket = socket;
       (window as any).__socketReady = true;
@@ -28,7 +26,6 @@ export function disconnectSocket() {
   if (typeof window !== 'undefined') (window as any).__socketReady = false;
 }
 
-// Eventos versionados — ignora duplicatas e eventos antigos
 const seen = new Map<string, number>();
 function isStale(resourceId: string, version: number): boolean {
   const last = seen.get(resourceId) ?? -1;
@@ -50,7 +47,6 @@ export interface OrderUpdatedPayload {
   status: 'pending' | 'confirmed' | 'declined';
 }
 
-// Hook: escuta nft.updated e order.updated, reconcilia via TanStack Query
 export function useRealtimeSync() {
   const qc = useQueryClient();
 
@@ -74,7 +70,6 @@ export function useRealtimeSync() {
     s.on('nft.updated', onNftUpdated);
     s.on('order.updated', onOrderUpdated);
 
-    // Reconexão: reconcilia todos os recursos ativos com REST
     s.on('connect', () => {
       qc.invalidateQueries({ queryKey: ['nfts'] });
       qc.invalidateQueries({ queryKey: ['cart'] });

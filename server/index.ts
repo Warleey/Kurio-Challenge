@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto';
 const app=express();
 app.use(express.json());
 
-// ── Types ────────────────────────────────────────────────────────────────────
+// Types
 type NFT={id:string;name:string;price:string;image:string;category:string;network:string;edition:string;stock:number;version:number;description:string};
 type CartItem={id:string;quantity:number};
 type QuoteLine={id:string;name:string;image:string;quantity:number;price:string;total:string};
@@ -16,12 +16,12 @@ type Wallet={id:string;name:string;address:string;network:string;profileName?:st
 type User={id:string;email:string;name:string;username?:string;ens?:string;walletAlias?:string;avatar?:string;passwordHash:string;favorites:string[];wallets:Wallet[]};
 type DB={users:User[];session:Record<string,string>;products:NFT[];carts:Record<string,CartItem[]>;orders:Order[];keys:Record<string,{orderId:string;body:string}>};
 
-// ── ETH math ─────────────────────────────────────────────────────────────────
+// ETH math
 const SCALE=1000n;
 const fromEth=(s:string)=>{const [i,f='']=s.split('.');return BigInt(i)*SCALE+BigInt((f+'000').slice(0,3))};
 const eth=(n:bigint)=>`${n/SCALE}.${(n%SCALE).toString().padStart(3,'0')}`;
 
-// ── Fixtures ─────────────────────────────────────────────────────────────────
+// Fixtures
 const ALICE:User={id:'user-alice-0000-0000-0000-000000000001',name:'Alice Collector',email:'alice@kurio.test',username:'alice',passwordHash:'0771382e88bb08402547cd4bfd0f3a7fc742e9e27fea8889db6207ee23b9c82e',favorites:['emerald-ape','sage-nomad'],wallets:[{id:'wallet-alice-0001',name:'Carteira Principal',alias:'Principal',address:'0xALICE000000000000000000000000000000000001',network:'Ethereum',profileName:'Alice',email:'alice@kurio.test',walletType:'MetaMask'}]};
 const BOB:User={id:'user-bob-00000-0000-0000-000000000002',name:'Bob Trader',email:'bob@kurio.test',username:'bob',passwordHash:'550c7a6d0859d0773541dd478bd49214188b9358549d3519ea542442f86e079c',favorites:['golden-beat','ivory-baron'],wallets:[{id:'wallet-bob-0001',name:'Carteira Bob',alias:'Principal',address:'0xBOB0000000000000000000000000000000000002',network:'Polygon',profileName:'Bob',email:'bob@kurio.test',walletType:'WalletConnect'}]};
 const NFTS:NFT[]=[
@@ -39,7 +39,7 @@ const NFTS:NFT[]=[
   {id:'sunny-beat',name:'Sunny Beat #240',price:'0.69',image:'/nfts/golden.png',category:'Música',network:'Polygon',edition:'ABERTA',stock:21,version:1,description:'Som, cor e cultura digital em uma coleção.'},
 ];
 
-// ── In-memory DB (reset a cada restart) ──────────────────────────────────────
+// In-memory DB (reset a cada restart)
 const initDb=():DB=>({
   users:[structuredClone(ALICE),structuredClone(BOB)],
   session:{}, // token → userId
@@ -50,7 +50,7 @@ const initDb=():DB=>({
 });
 let db=initDb();
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// Helpers
 const sha256=(s:string)=>createHash('sha256').update(s).digest('hex');
 const uid=()=>crypto.randomUUID();
 const err=(res:express.Response,msg:string,status:number)=>res.status(status).json({message:msg});
@@ -64,24 +64,23 @@ const buildQuote=(req:express.Request,coupon:string|null):Quote=>{
   return {lines,subtotal:eth(subtotal),discount:eth(discount),fee:eth(fee),total:eth(subtotal-discount+fee),coupon,version:lines.map(l=>`${l.id}:${db.products.find(p=>p.id===l.id)!.version}:${l.quantity}`).join('|')+`:${coupon??''}`};
 };
 
-// ── Socket.IO ─────────────────────────────────────────────────────────────────
+// Socket.IO
 const httpServer=createServer(app);
 const io=new Server(httpServer,{cors:{origin:'*'},path:'/socket.io'});
 const broadcast=(event:string,payload:unknown)=>io.emit(event,payload);
 
 io.on('connection',(socket)=>{
-  // Permite que testes E2E disparem eventos via socket.emit('__test:nft.updated', payload)
   socket.on('__test:nft.updated',(payload)=>broadcast('nft.updated',payload));
   socket.on('__test:order.updated',(payload)=>broadcast('order.updated',payload));
 });
 
-// ── Auth middleware ───────────────────────────────────────────────────────────
+// Auth middleware
 const requireAuth=(req:express.Request,res:express.Response,next:express.NextFunction)=>{
   if(!userByToken(req))return void err(res,'Faça login',401);
   next();
 };
 
-// ── Routes ────────────────────────────────────────────────────────────────────
+// Routes
 app.get('/api/nfts',(req,res)=>{
   const p=req.query as Record<string,string>;
   let list=db.products.filter(n=>
@@ -233,7 +232,6 @@ app.post('/api/orders',requireAuth,(req,res)=>{
   const id=uid();
   const order:Order={id,status:'pending',transaction:'0x'+id.replaceAll('-','').slice(0,16).toUpperCase(),wallet:`${u.id}:${d.wallet}`,network:d.network,quote:fresh,createdAt:new Date().toISOString()};
   db.orders.unshift(order);db.keys[d.key]={orderId:id,body};db.carts[u.id]=[];
-  // Confirma ou recusa após 3s e emite socket
   setTimeout(()=>{
     const o=db.orders.find(x=>x.id===id);
     if(!o||o.status!=='pending')return;
@@ -245,6 +243,6 @@ app.post('/api/orders',requireAuth,(req,res)=>{
 
 app.post('/api/demo/reset',(_req,res)=>{db=initDb();res.json({ok:true});});
 
-// ── Start ─────────────────────────────────────────────────────────────────────
+// Start
 const PORT=Number(process.env.PORT??3001);
 httpServer.listen(PORT,()=>console.log(`[kurio-server] http://localhost:${PORT}`));

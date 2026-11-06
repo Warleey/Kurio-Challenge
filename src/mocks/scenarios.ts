@@ -1,17 +1,3 @@
-/**
- * Cenários de rede configuráveis para MSW.
- *
- * Ative via localStorage no DevTools:
- *   localStorage.setItem('kurio-scenario', 'slow')    // latência alta
- *   localStorage.setItem('kurio-scenario', 'chaos')   // latência variável + falhas ocasionais
- *   localStorage.setItem('kurio-scenario', 'offline') // todas as chamadas falham com 503
- *   localStorage.setItem('kurio-scenario', 'expired') // sessão expira imediatamente
- *   localStorage.setItem('kurio-scenario', 'timeout-order') // POST /orders trava (simula timeout)
- *   localStorage.removeItem('kurio-scenario')         // padrão (rápido)
- *
- * Ou via variável de ambiente no build:
- *   VITE_SCENARIO=slow npm run dev
- */
 
 export type Scenario = 'default' | 'slow' | 'chaos' | 'offline' | 'expired' | 'timeout-order';
 
