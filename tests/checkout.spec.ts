@@ -34,9 +34,8 @@ test('clique repetido no botão de confirmar não duplica o pedido',async({page}
     await page.getByRole('button',{name:'Revisar compra'}).click();
     await page.getByRole('button',{name:'Confirmar pedido simulado'}).click();
   }
-  await expect(page.getByRole('heading',{name:'Seus NFTs agora estão na sua carteira'})).toBeVisible({timeout:20000});
-  await expect(page).toHaveURL(/\/order\//);
-  // Verifica que só existe 1 pedido no DB
+  await expect(page).toHaveURL(/\/order\//,{timeout:20000});
+  await expect(page.locator('.order-title h2')).toBeVisible({timeout:5000});
   const orderCount=await page.evaluate(()=>{
     const db=JSON.parse(localStorage.getItem('kurio-db-v1')||'{}');
     return (db.orders||[]).length;

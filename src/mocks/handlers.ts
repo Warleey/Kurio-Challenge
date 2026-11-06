@@ -53,7 +53,7 @@ export const handlers=[
   const id=crypto.randomUUID();
   const order:Order={id,status:'pending',transaction:'0x'+id.replaceAll('-','').slice(0,16).toUpperCase(),wallet:`${u.id}:${d.wallet}`,network:d.network,quote:fresh,createdAt:new Date().toISOString()};
   db.orders.unshift(order);db.keys[d.key]={orderId:id,body};db.carts[u.id]=[];save();
-  setTimeout(()=>{const o=db.orders.find(x=>x.id===id);if(!o||o.status!=='pending')return;const finalStatus=Math.random()<0.85?'confirmed':'declined';o.status=finalStatus;save();broadcastOrderUpdated({orderId:id,version:2,status:finalStatus});},3000);
+  setTimeout(()=>{const o=db.orders.find(x=>x.id===id);if(!o||o.status!=='pending')return;const finalStatus=Math.random()<0.85?'confirmed':'declined';o.status=finalStatus;save();broadcastOrderUpdated({orderId:id,version:2,status:finalStatus});},1500);
   if(shouldTimeoutOrder())await new Promise(r=>setTimeout(r,15000));
   return HttpResponse.json(order,{status:201});
  }),
