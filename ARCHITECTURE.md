@@ -346,7 +346,7 @@ Medições realizadas com `npm run build && npm run preview` (`localhost:4173`),
 
 | Página | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|---|
-| `/` | 99 | 93 | 100 | 92 |
+| `/` | 100 | 95 | 96 | 92 |
 | `/nft/emerald-ape` | 80 | 98 | 100 | 92 |
 | `/cart` | 100 | 96 | 100 | 92 |
 | `/login` | 99 | 96 | 100 | 91 |
@@ -387,5 +387,5 @@ Medições realizadas com `npm run build && npm run preview` (`localhost:4173`),
 - **Hash de senha**: o mock usa SHA-256 (pré-computado nos fixtures para determinismo). Uma implementação real deve usar bcrypt ou Argon2.
 - **Sem HTTPS em desenvolvimento**: o proxy Vite e o servidor Express se comunicam via HTTP simples localmente. A terminação TLS seria feita pelo proxy reverso (ex: Vercel, nginx) em produção.
 - **MSW no build de produção**: o `mockServiceWorker.js` é incluído no build quando `VITE_MOCKS=true`. Defina `VITE_MOCKS=false` e aponte o proxy para um servidor real antes de um deploy em produção.
-- **Accessibility 93 na home (desktop)**: abaixo da meta de 95. Causado por contraste insuficiente em elementos de texto secundário do hero e nav. Identificado no Lighthouse; correção planejada.
+- **Accessibility 95 na home (desktop)**: corrigido ajustando hierarquia de headings (h3→h2 no sidebar), aumentando touch targets da paginação para 44px e aumentando contraste de textos secundários para ≥ 4.5:1.
 - **Performance 80 no detalhe (desktop)**: CLS das imagens da galeria servidas via MSW. Dimensões fixas nas tags `<img>` mitigam parcialmente; o MSW adiciona latência que o Lighthouse penaliza no CLS.
