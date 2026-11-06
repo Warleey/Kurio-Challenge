@@ -16,6 +16,7 @@ export function Checkout(){
  const {data:wallets=[]}=useQuery({queryKey:['wallets',session?.id],queryFn:async()=>(await api.get<{id:string;name:string;address:string;network:string}[]>('/wallets')).data,enabled:!!session});
  const query=useQueryClient(),nav=useNavigate();
  const [display,setDisplay]=useState(''),[username,setUsername]=useState(''),[wallet,setWallet]=useState('MetaMask'),[network,setNetwork]=useState('Ethereum'),[address,setAddress]=useState('0xDEMO000000000000000000000000000000000000'),[error,setError]=useState(''),[busy,setBusy]=useState(false),[review,setReview]=useState(false);
+ useEffect(()=>{if(session){setDisplay(d=>d||session.name);setUsername(u=>u||(session as any).username||session.name);}},[session]);
  // Chave de idempotencia persistida — sobrevive a reload
  const [key]=useState(()=>{
  const saved=localStorage.getItem('kurio-idem-key');
